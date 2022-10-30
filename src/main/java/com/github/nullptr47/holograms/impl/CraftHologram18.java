@@ -35,7 +35,7 @@ import java.util.function.BiConsumer;
 public class CraftHologram18 extends Hologram {
 
     private final World world;
-    private final int[] id;
+    private int[] id;
 
     /**
      * constructor method
@@ -165,6 +165,13 @@ public class CraftHologram18 extends Hologram {
 
         for (Entity entity : world.getEntities())
             if (entity.getEntityId() == id[line]) entity.setCustomName(display);
+
+    }
+
+    public void setLines(List<String> lines) {
+
+        id = new int[lines.size()];
+        super.lines = lines;
 
     }
 
