@@ -16,6 +16,7 @@ public abstract class Hologram {
 
     public abstract void display();
     public abstract void displayTo(Player... players);
+    public abstract void displayTo(List<String> lines, Player... players);
     public abstract void changeDisplayTo(Player[] players, String... lines);
     public abstract void changeDisplayTo(Player[] players, List<String> lines);
     public abstract void changeLine(int line, String display);

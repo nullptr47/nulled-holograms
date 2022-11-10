@@ -84,16 +84,22 @@ public class CraftHologram18 extends Hologram {
 
     }
 
+    public void displayTo(Player... players) {
+
+        displayTo(lines, players);
+
+    }
+
     /**
      * Display the hologram for certain players only. (client-sided holograms)
      * @param players who will see the hologram
      */
-    public void displayTo(Player... players) {
+    public void displayTo(List<String> lines, Player... players) {
 
         double additional = 0;
         int address = 0;
 
-        for (String text : getLines()) {
+        for (String text : lines) {
 
             int entityId = (int) (Math.random() * Integer.MAX_VALUE);
             CraftArmorStand armorStand = new CraftArmorStand((CraftServer) Bukkit.getServer(), new EntityArmorStand(((CraftWorld) world).getHandle()));
@@ -107,8 +113,9 @@ public class CraftHologram18 extends Hologram {
             try {
                 FieldUtils.writeDeclaredField(spawnPacket, "a", entityId, true);
                 FieldUtils.writeDeclaredField(spawnPacket, "j", 78, true);
+            } catch (Exception exception) {
+                exception.printStackTrace();
             }
-            catch (Exception exception) { exception.printStackTrace(); }
 
             spawnPacket.a(MathHelper.floor(x * 32.0D));
             spawnPacket.b(MathHelper.floor((y - additional) * 32.0D));
@@ -128,8 +135,8 @@ public class CraftHologram18 extends Hologram {
             additional += 0.25;
             id[address++] = entityId;
 
-        }
 
+        }
     }
 
     public void changeDisplayTo(Player[] players, String... lines) {
