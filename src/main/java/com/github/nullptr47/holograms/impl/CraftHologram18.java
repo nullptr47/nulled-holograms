@@ -195,7 +195,7 @@ public class CraftHologram18 extends Hologram {
 
         for (String text : lines) {
 
-            if (index >= lines.size()) {
+            if (index >= entities.size()) {
 
                 displayTo01(lines.subList(index, lines.size()), new Location(world, x, y + (0.25 * index), z), players);
                 return;
