@@ -190,7 +190,7 @@ public class CraftHologram18 extends Hologram {
     }
 
     /**
-     * removes the hologram (Only works for server-side holograms)
+     * removes the hologram
      */
     public void removeFor(Player... players) {
 
