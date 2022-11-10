@@ -70,7 +70,7 @@ public class CraftHologram18 extends Hologram {
             armorStand.setCustomName(text);
             armorStand.setSmall(true);
 
-            entities.set(address, armorStand);
+            entities.add(armorStand);
 
             additional += 0.25;
 
@@ -129,7 +129,7 @@ public class CraftHologram18 extends Hologram {
             }
 
             additional += 0.25;
-            entities.set(address, armorStand);
+            entities.add(armorStand);
 
         }
     }
