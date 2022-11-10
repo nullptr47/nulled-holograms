@@ -1,7 +1,7 @@
 package com.github.nullptr47.holograms.impl;
 
 import com.github.nullptr47.holograms.Hologram;
-import lombok.val;
+import com.google.common.collect.Lists;
 import net.minecraft.server.v1_8_R3.*;
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.bukkit.Bukkit;
@@ -15,15 +15,9 @@ import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.function.BiConsumer;
 
 /**
  * @author nullptr47
@@ -33,7 +27,7 @@ import java.util.function.BiConsumer;
 public class CraftHologram18 extends Hologram {
 
     private final World world;
-    private int[] id;
+    private List<Entity> entities;
 
     /**
      * constructor method
@@ -50,7 +44,7 @@ public class CraftHologram18 extends Hologram {
         super(x, y, z, pitch, yaw, lines);
 
         this.world = world;
-        this.id = new int[lines.size()];
+        this.entities = Lists.newArrayList();
 
     }
 
@@ -76,7 +70,7 @@ public class CraftHologram18 extends Hologram {
             armorStand.setCustomName(text);
             armorStand.setSmall(true);
 
-            id[address++] = armorStand.getEntityId();
+            entities.set(address, armorStand);
 
             additional += 0.25;
 
@@ -100,6 +94,8 @@ public class CraftHologram18 extends Hologram {
         int address = 0;
 
         for (String text : lines) {
+
+            if (text.isEmpty()) { additional += 0.25; continue; }
 
             int entityId = (int) (Math.random() * Integer.MAX_VALUE);
             CraftArmorStand armorStand = new CraftArmorStand((CraftServer) Bukkit.getServer(), new EntityArmorStand(((CraftWorld) world).getHandle()));
@@ -133,8 +129,7 @@ public class CraftHologram18 extends Hologram {
             }
 
             additional += 0.25;
-            id[address++] = entityId;
-
+            entities.set(address, armorStand);
 
         }
     }
@@ -152,9 +147,9 @@ public class CraftHologram18 extends Hologram {
      */
     public void changeDisplayTo(Player[] players, List<String> lines) {
 
-        for (int index = 0; index < id.length; index++) {
+        for (int index = 0; index < lines.size(); index++) {
 
-            int entityId = id[index];
+            int entityId = entities.get(index).getEntityId();
             String text = lines.get(index);
             CraftArmorStand armorStand = new CraftArmorStand((CraftServer) Bukkit.getServer(), new EntityArmorStand(((CraftWorld) world).getHandle()));
 
@@ -174,15 +169,16 @@ public class CraftHologram18 extends Hologram {
 
     public void changeLine(int line, String display) {
 
-        for (Entity entity : world.getEntities())
-            if (entity.getEntityId() == id[line]) entity.setCustomName(display);
+        entities.get(line).setCustomName(display);
 
     }
 
     public void setLines(List<String> lines) {
 
-        id = new int[lines.size()];
         super.lines = lines;
+        this.remove();
+        entities.clear();
+        display();
 
     }
 
@@ -191,8 +187,8 @@ public class CraftHologram18 extends Hologram {
      */
     public void remove() {
 
-        for (Entity entity : world.getEntitiesByClasses(CraftArmorStand.class))
-            for (Integer entityId : id) if (entity.getEntityId() == entityId) entity.remove();
+        for (Entity entity : entities)
+            entity.remove();
 
     }
 
@@ -201,13 +197,13 @@ public class CraftHologram18 extends Hologram {
      */
     public void removeFor(Player... players) {
 
-        for (Player player : players) {
+        List<PacketPlayOutEntityDestroy> packets = Lists.newArrayList();
 
-            PacketPlayOutEntityDestroy destroyPacket = new PacketPlayOutEntityDestroy(id);
+        for (Entity entity : entities)
+            packets.add(new PacketPlayOutEntityDestroy(((CraftArmorStand) entity).getHandle().getId()));
 
-            ((CraftPlayer) player).getHandle().playerConnection.sendPacket(destroyPacket);
-
-        }
+        for (Player player : players)
+            packets.forEach(((CraftPlayer) player).getHandle().playerConnection::sendPacket);
 
     }
 
