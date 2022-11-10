@@ -133,51 +133,6 @@ public class CraftHologram18 extends Hologram {
         }
     }
 
-    public void displayTo01(List<String> lines, Location location, Player... players) {
-
-        double additional = 0;
-
-        for (String text : lines) {
-
-            if (text.isEmpty()) { additional += 0.25; continue; }
-
-            int entityId = (int) (Math.random() * Integer.MAX_VALUE);
-            CraftArmorStand armorStand = new CraftArmorStand((CraftServer) Bukkit.getServer(), new EntityArmorStand(((CraftWorld) world).getHandle()));
-            PacketPlayOutSpawnEntity spawnPacket = new PacketPlayOutSpawnEntity();
-
-            armorStand.setCustomName(text);
-            armorStand.setCustomNameVisible(true);
-            armorStand.setGravity(false);
-            armorStand.setVisible(false);
-
-            try {
-                FieldUtils.writeDeclaredField(spawnPacket, "a", entityId, true);
-                FieldUtils.writeDeclaredField(spawnPacket, "j", 78, true);
-            } catch (Exception exception) {
-                exception.printStackTrace();
-            }
-
-            spawnPacket.a(MathHelper.floor(x * 32.0D));
-            spawnPacket.b(MathHelper.floor((y - additional) * 32.0D));
-            spawnPacket.c(MathHelper.floor(z * 32.0D));
-            spawnPacket.d(MathHelper.floor(pitch * 256.0F / 360.0F));
-            spawnPacket.e(MathHelper.floor(yaw * 256.0F / 360.0F));
-
-            PacketPlayOutEntityMetadata dataPacket = new PacketPlayOutEntityMetadata(entityId, armorStand.getHandle().getDataWatcher(), false);
-
-            for (Player player : players) {
-
-                ((CraftPlayer) player).getHandle().playerConnection.sendPacket(spawnPacket);
-                ((CraftPlayer) player).getHandle().playerConnection.sendPacket(dataPacket);
-
-            }
-
-            additional += 0.25;
-            entities.add(armorStand);
-
-        }
-    }
-
     public void changeDisplayTo(Player[] players, String... lines) {
 
         changeDisplayTo(players, Arrays.asList(lines));
@@ -191,23 +146,14 @@ public class CraftHologram18 extends Hologram {
      */
     public void changeDisplayTo(Player[] players, List<String> lines) {
 
-        for (int index = 0; index < lines.size(); index++) {
+        int index = 0;
 
-            if (index > entities.size()) {
+        for (String text : lines) {
 
-                displayTo01(lines.subList(index, lines.size()), new Location(world, x, y + 0.25 * index, z), players);
-                return;
-
-            }
-
-            int entityId = entities.get(index).getEntityId();
-            String text = lines.get(index);
-            CraftArmorStand armorStand = new CraftArmorStand((CraftServer) Bukkit.getServer(), new EntityArmorStand(((CraftWorld) world).getHandle()));
+            CraftArmorStand armorStand = (CraftArmorStand) entities.get(index++);
+            int entityId = armorStand.getEntityId();
 
             armorStand.setCustomName(text);
-            armorStand.setCustomNameVisible(true);
-            armorStand.setGravity(false);
-            armorStand.setVisible(false);
 
             PacketPlayOutEntityMetadata dataPacket = new PacketPlayOutEntityMetadata(entityId, armorStand.getHandle().getDataWatcher(), false);
 
