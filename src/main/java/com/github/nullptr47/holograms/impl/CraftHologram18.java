@@ -2,10 +2,7 @@ package com.github.nullptr47.holograms.impl;
 
 import com.github.nullptr47.holograms.Hologram;
 import lombok.val;
-import net.minecraft.server.v1_8_R3.EntityArmorStand;
-import net.minecraft.server.v1_8_R3.MathHelper;
-import net.minecraft.server.v1_8_R3.PacketPlayOutEntityMetadata;
-import net.minecraft.server.v1_8_R3.PacketPlayOutSpawnEntity;
+import net.minecraft.server.v1_8_R3.*;
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -22,6 +19,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -134,17 +132,23 @@ public class CraftHologram18 extends Hologram {
 
     }
 
+    public void changeDisplayTo(Player[] players, String... lines) {
+
+        changeDisplayTo(players, Arrays.asList(lines));
+
+    }
+
     /**
      * changes the text for selected players.
      * @implNote: text must have the same lines amount.
      * @param players who will receive update
      */
-    public void changeDisplayTo(Player[] players, String... lines) {
+    public void changeDisplayTo(Player[] players, List<String> lines) {
 
         for (int index = 0; index < id.length; index++) {
 
             int entityId = id[index];
-            String text = lines[index];
+            String text = lines.get(index);
             CraftArmorStand armorStand = new CraftArmorStand((CraftServer) Bukkit.getServer(), new EntityArmorStand(((CraftWorld) world).getHandle()));
 
             armorStand.setCustomName(text);
@@ -182,6 +186,21 @@ public class CraftHologram18 extends Hologram {
 
         for (Entity entity : world.getEntitiesByClasses(CraftArmorStand.class))
             for (Integer entityId : id) if (entity.getEntityId() == entityId) entity.remove();
+
+    }
+
+    /**
+     * removes the hologram (Only works for server-side holograms)
+     */
+    public void removeFor(Player... players) {
+
+        for (Player player : players) {
+
+            PacketPlayOutEntityDestroy destroyPacket = new PacketPlayOutEntityDestroy(id);
+
+            ((CraftPlayer) player).getHandle().playerConnection.sendPacket(destroyPacket);
+
+        }
 
     }
 
